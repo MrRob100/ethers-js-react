@@ -1,27 +1,21 @@
-import logo from './logo.svg';
 import './App.css';
 
-import { getDefaultProvider, providers, Wallet, Contract } from "ethers";
-
-import {useEffect, useState} from "react";
+import { getDefaultProvider, providers, Wallet, Contract, utils } from "ethers";
 
 function App() {
-  const [greeting, setGreeting] = useState('empty');
-  const providerUrl = process.env.REACT_APP_PROVIDER_URL;
+  const greeting = 'none';
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
-  const contractAddress = process.env.REACT_APP_SMART_CONTRACT_ADDRESS;
 
-  const provider = new getDefaultProvider("ropsten", {
-    infura: "b59953df17ce4e248a1198806fe9c4bd",
-  });
+  const provider = new providers.JsonRpcProvider(`https://mainnet.infura.io/v3/${infuraKey}`)
 
-  const signer = Wallet.createRandom();
+  const main = async () => {
+    const balance = await provider.getBalance(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    console.log(utils.formatEther(balance));
+  }
 
-  const abi = '[{ "inputs": [], "name": "Greet", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "string", "name": "_greeting", "type": "string" }], "name": "setGreeting", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [], "name": "greet", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "greeting", "outputs": [{ "internalType": "string", "name": "", "type": "string" }], "stateMutability": "view", "type": "function" }]'
+  main()
 
-  const contract = new Contract(contractAddress, abi, provider)
 
-  console.log('contract', contract);
 
   return (
     <div className="App">
