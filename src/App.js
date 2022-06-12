@@ -2,8 +2,28 @@ import './App.css';
 
 import { getDefaultProvider, providers, Wallet, Contract, utils } from "ethers";
 
+import React, { Component, useState } from "react";
+import Select from 'react-select'
+
+import sass from './sass/app.scss';
+
 function App() {
-  const greeting = 'none';
+
+  const appSigners = [
+    { value: 'metamask', label: 'Metamask' },
+    { value: 'smart_contract_address', label: 'Smart Contract Address' },
+    { value: 'robs_eth_wallet', label: 'Robs ETH wallet' },
+  ]
+
+  const networks = [
+    { value: 'rinkbey', label: 'Rinkbey' },
+    { value: 'ropsten', label: 'Ropsten' },
+    { value: 'covan', label: 'Covan' },
+    { value: 'Mainnet', label: 'Mainnet' },
+  ]
+
+  const [greeting, setGreeting] = useState('none');
+
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
 
   const provider = new providers.JsonRpcProvider(`https://ropsten.infura.io/v3/${infuraKey}`)
@@ -13,22 +33,45 @@ function App() {
 
   const contract = new Contract(contractAddress, abi, provider);
 
-  const main = async () => {
+  const fetchBalance = async () => {
     const balance = await provider.getBalance(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
     console.log('balance', utils.formatEther(balance));
-
-    const greeting2 = await contract.greet()
-    console.log('greeting', greeting2); 
   }
 
-  main()
+  const fetchGreeting = async () => {
+    const greeting = await contract.greet()
+    setGreeting(greeting)
+  }
 
-
+  fetchBalance()
+  fetchGreeting()
 
   return (
     <div className="App">
-      <h3>Greeting: {greeting}</h3>
-    </div>
+      <div className="background-container">
+        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/moon2.png" alt=""/>
+        <div className="stars"></div>
+        <div className="twinkling"></div>
+        <div className="clouds"></div>
+      </div>
+      <div className="container z-10">
+        <div className="card m-5 p-4">
+          <div className="cardBody">
+            <h3>Smart Contract Greeting: {greeting}</h3>
+            <div className="row">
+              <div className="col-md-4">
+                <label>Networks:</label>
+                <Select options={networks} />
+              </div>
+              <div className="col-md-4">
+                <label>Transaction Signer:</label>
+                <Select options={appSigners} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>   
   );
 }
 
