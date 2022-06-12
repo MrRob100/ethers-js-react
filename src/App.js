@@ -23,6 +23,8 @@ function App() {
   ]
 
   const [greeting, setGreeting] = useState('none');
+  const [network, setNetwork] = useState('');
+  const [txSigner, setTxSigner] = useState('');
 
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
 
@@ -46,10 +48,20 @@ function App() {
   fetchBalance()
   fetchGreeting()
 
+  const onNetworkChange = (val) => {
+    const { value } = val;
+    setNetwork(val)
+  };
+
+  const onTxSignerChange = (val) => {
+    const { value } = val;
+    setTxSigner(val)
+  };
+
   return (
     <div className="App">
       <div className="background-container">
-        <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/moon2.png" alt=""/>
+        {/* <img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1231630/moon2.png" alt=""/> */}
         <div className="stars"></div>
         <div className="twinkling"></div>
         <div className="clouds"></div>
@@ -61,11 +73,11 @@ function App() {
             <div className="row">
               <div className="col-md-4">
                 <label>Networks:</label>
-                <Select options={networks} />
+                <Select options={networks} onChange={onNetworkChange} />
               </div>
               <div className="col-md-4">
                 <label>Transaction Signer:</label>
-                <Select options={appSigners} />
+                <Select options={appSigners} onChange={onTxSignerChange} />
               </div>
             </div>
           </div>
