@@ -2,14 +2,14 @@ import './App.css';
 
 import { getDefaultProvider, providers, Wallet, Contract, utils } from "ethers";
 
-import React, { Component, useState } from "react";
+import React, { Component, useState, useEffect } from "react";
 import Select from 'react-select'
 
 import sass from './sass/app.scss';
 
 function App() {
 
-  const appSigners = [
+  const txSigners = [
     { value: 'metamask', label: 'Metamask' },
     { value: 'smart_contract_address', label: 'Smart Contract Address' },
     { value: 'robs_eth_wallet', label: 'Robs ETH wallet' },
@@ -23,8 +23,10 @@ function App() {
   ]
 
   const [greeting, setGreeting] = useState('none');
-  const [network, setNetwork] = useState('');
-  const [txSigner, setTxSigner] = useState('');
+  const [network, setNetwork] = useState('ropsten');
+  const [txSigner, setTxSigner] = useState('robs_eth_wallet');
+  const [signerAddress, setSignerAddress] = useState('');
+  const [signerBalance, setSignerBalance] = useState(0);
 
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
 
@@ -36,8 +38,10 @@ function App() {
   const contract = new Contract(contractAddress, abi, provider);
 
   const fetchBalance = async () => {
-    const balance = await provider.getBalance(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
-    console.log('balance', utils.formatEther(balance));
+    if (signerAddress !== "") {
+      const balance = await provider.getBalance(signerAddress);
+      setSignerBalance(utils.formatEther(balance));
+    }
   }
 
   const fetchGreeting = async () => {
@@ -54,9 +58,24 @@ function App() {
   };
 
   const onTxSignerChange = (val) => {
-    const { value } = val;
-    setTxSigner(val)
+    const { value } = val.value;
+    setTxSigner(val.value);
+    findAddress(val.value)
   };
+
+  const findAddress = (signer) => {
+    if (signer === 'robs_eth_wallet') {
+      setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+      fetchBalance()
+    } else {
+      setSignerBalance(0);
+      setSignerAddress('');
+    }
+  }
+
+  useEffect(() => {
+    findAddress(txSigner);
+  }, []);
 
   return (
     <div className="App">
@@ -70,14 +89,19 @@ function App() {
         <div className="card m-5 p-4">
           <div className="cardBody">
             <h3>Smart Contract Greeting: {greeting}</h3>
+            <h4>Wallet Name: </h4>
             <div className="row">
               <div className="col-md-4">
                 <label>Networks:</label>
-                <Select options={networks} onChange={onNetworkChange} />
+                <Select options={networks} value={networks.find(item => item.value === network)} onChange={onNetworkChange} />
               </div>
               <div className="col-md-4">
                 <label>Transaction Signer:</label>
-                <Select options={appSigners} onChange={onTxSignerChange} />
+                <Select options={txSigners} value={txSigners.find(item => item.value === txSigner)} onChange={onTxSignerChange} />
+                <label>Signer address:</label>
+                <p>{signerAddress}</p>
+                <label>Signer balance:</label>
+                <p>{signerBalance} ETH</p>
               </div>
             </div>
           </div>
