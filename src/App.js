@@ -10,9 +10,9 @@ import sass from './sass/app.scss';
 function App() {
 
   const networks = [
-    { value: 'rinkbey', label: 'Rinkbey' },
+    { value: 'rinkeby', label: 'Rinkeby' },
     { value: 'ropsten', label: 'Ropsten' },
-    { value: 'covan', label: 'Covan' },
+    { value: 'kovan', label: 'Kovan' },
     { value: 'Mainnet', label: 'Mainnet' },
   ]
 
@@ -33,12 +33,13 @@ function App() {
 
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
 
-  const provider = new providers.JsonRpcProvider(`https://ropsten.infura.io/v3/${infuraKey}`)
-
   const contractAddress = process.env.REACT_APP_SMART_CONTRACT_ADDRESS;
   const abi = '[{"inputs":[],"name":"Greet","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_greeting","type":"string"}],"name":"setGreeting","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"greet","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"greeting","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"sayHey","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"what","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"}]';
 
-  const contract = new Contract(contractAddress, abi, provider);
+  const contractProvider = new providers.JsonRpcProvider(`https://ropsten.infura.io/v3/${infuraKey}`)
+  const contract = new Contract(contractAddress, abi, contractProvider);
+
+  const provider = new providers.JsonRpcProvider(`https://${network}.infura.io/v3/${infuraKey}`)
 
   const fetchBalances = async () => {
     if (signerAddress !== "") {
@@ -62,7 +63,7 @@ function App() {
 
   const onNetworkChange = (val) => {
     const { value } = val;
-    setNetwork(val)
+    setNetwork(val.value)
   };
 
   const onTxSignerChange = (val) => {
