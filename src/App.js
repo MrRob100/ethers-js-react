@@ -9,12 +9,6 @@ import sass from './sass/app.scss';
 
 function App() {
 
-  const txSigners = [
-    { value: 'metamask', label: 'Metamask' },
-    { value: 'smart_contract_address', label: 'Smart Contract Address' },
-    { value: 'robs_eth_wallet', label: 'Robs ETH wallet' },
-  ]
-
   const networks = [
     { value: 'rinkbey', label: 'Rinkbey' },
     { value: 'ropsten', label: 'Ropsten' },
@@ -22,11 +16,20 @@ function App() {
     { value: 'Mainnet', label: 'Mainnet' },
   ]
 
+  const addresses = [
+    { value: 'metamask', label: 'Metamask' },
+    { value: 'smart_contract_address', label: 'Smart Contract Address' },
+    { value: 'robs_eth_wallet', label: 'Robs ETH wallet' },
+  ]
+
   const [greeting, setGreeting] = useState('none');
   const [network, setNetwork] = useState('ropsten');
   const [txSigner, setTxSigner] = useState('robs_eth_wallet');
+  const [reciever, setReciever] = useState('robs_eth_wallet');
   const [signerAddress, setSignerAddress] = useState('');
   const [signerBalance, setSignerBalance] = useState(0);
+  const [recieverAddress, setRecieverAddress] = useState('');
+  const [recieverBalance, setRecieverBalance] = useState(0);
 
   const infuraKey = process.env.REACT_APP_INFURA_KEY;
 
@@ -37,10 +40,15 @@ function App() {
 
   const contract = new Contract(contractAddress, abi, provider);
 
-  const fetchBalance = async () => {
+  const fetchBalances = async () => {
     if (signerAddress !== "") {
       const balance = await provider.getBalance(signerAddress);
       setSignerBalance(utils.formatEther(balance));
+    }
+
+    if (recieverAddress !== "") {
+      const balance = await provider.getBalance(recieverAddress);
+      setRecieverBalance(utils.formatEther(balance));
     }
   }
 
@@ -49,7 +57,7 @@ function App() {
     setGreeting(greeting)
   }
 
-  fetchBalance()
+  fetchBalances()
   fetchGreeting()
 
   const onNetworkChange = (val) => {
@@ -59,22 +67,43 @@ function App() {
 
   const onTxSignerChange = (val) => {
     const { value } = val.value;
-    setTxSigner(val.value);
-    findAddress(val.value)
-  };
-
-  const findAddress = (signer) => {
-    if (signer === 'robs_eth_wallet') {
+    setReciever(val.value);
+    if (val.value === 'robs_eth_wallet') {
       setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
-      fetchBalance()
     } else {
       setSignerBalance(0);
       setSignerAddress('');
     }
-  }
+  };
+
+  const onRecieverChange = (val) => {
+    const { value } = val.value;
+    setReciever(val.value);
+    if (val.value === 'robs_eth_wallet') {
+      setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else {
+      setRecieverBalance(0);
+      setRecieverAddress('');
+    }
+  };
 
   useEffect(() => {
-    findAddress(txSigner);
+    if (txSigner === 'robs_eth_wallet') {
+      setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else {
+      setSignerBalance(0);
+      setSignerAddress('');
+    }
+
+    if (reciever === 'robs_eth_wallet') {
+      setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else {
+      setRecieverBalance(0);
+      setRecieverAddress('');
+    }
+
+
+    fetchBalances()
   }, []);
 
   return (
@@ -97,11 +126,19 @@ function App() {
               </div>
               <div className="col-md-4">
                 <label>Transaction Signer:</label>
-                <Select options={txSigners} value={txSigners.find(item => item.value === txSigner)} onChange={onTxSignerChange} />
+                <Select options={addresses} value={addresses.find(item => item.value === txSigner)} onChange={onTxSignerChange} />
                 <label>Signer address:</label>
                 <p>{signerAddress}</p>
                 <label>Signer balance:</label>
                 <p>{signerBalance} ETH</p>
+              </div>
+              <div className="col-md-4">
+                <label>Reciever</label>
+                <Select options={addresses} value={addresses.find(item => item.value === reciever)} onChange={onRecieverChange} />
+                <label>Reciever address:</label>
+                <p>{recieverAddress}</p>
+                <label>Reciever balance:</label>
+                <p>{recieverBalance} ETH</p>
               </div>
             </div>
           </div>
