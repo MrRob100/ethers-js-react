@@ -20,6 +20,7 @@ function App() {
     { value: 'metamask', label: 'Metamask' },
     { value: 'smart_contract_address', label: 'Smart Contract Address' },
     { value: 'robs_eth_wallet', label: 'Robs ETH wallet' },
+    { value: 'robs_eth_wallet_2', label: 'Robs ETH wallet 2' },
   ]
 
   const [greeting, setGreeting] = useState('none');
@@ -68,9 +69,11 @@ function App() {
 
   const onTxSignerChange = (val) => {
     const { value } = val.value;
-    setReciever(val.value);
+    setTxSigner(val.value);
     if (val.value === 'robs_eth_wallet') {
       setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else if (val.value === 'robs_eth_wallet_2') {
+      setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS_2);
     } else {
       setSignerBalance(0);
       setSignerAddress('');
@@ -82,6 +85,8 @@ function App() {
     setReciever(val.value);
     if (val.value === 'robs_eth_wallet') {
       setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else if (val.value === 'robs_eth_wallet_2') {
+      setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS_2);
     } else {
       setRecieverBalance(0);
       setRecieverAddress('');
@@ -91,6 +96,8 @@ function App() {
   useEffect(() => {
     if (txSigner === 'robs_eth_wallet') {
       setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else if (txSigner === 'robs_eth_wallet_2') {
+      setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS_2);
     } else {
       setSignerBalance(0);
       setSignerAddress('');
@@ -98,11 +105,12 @@ function App() {
 
     if (reciever === 'robs_eth_wallet') {
       setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
+    } else if (txSigner === 'robs_eth_wallet_2') {
+      setRecieverAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS_2);
     } else {
       setRecieverBalance(0);
       setRecieverAddress('');
     }
-
 
     fetchBalances()
   }, []);
