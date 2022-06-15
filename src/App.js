@@ -1,6 +1,6 @@
 import './App.css';
 
-import { getDefaultProvider, providers, Wallet, Contract, utils } from "ethers";
+import { getDefaultProvider, providers, Wallet, Contract, utilsm, utils } from "ethers";
 
 import React, { Component, useState, useEffect } from "react";
 import Select from 'react-select'
@@ -24,6 +24,7 @@ function App() {
   ]
 
   const [greeting, setGreeting] = useState('none');
+  const [greetingInputValue, setGreetingInputValue] = useState('');
   const [network, setNetwork] = useState('ropsten');
   const [txSigner, setTxSigner] = useState('robs_eth_wallet');
   const [reciever, setReciever] = useState('robs_eth_wallet');
@@ -41,6 +42,21 @@ function App() {
   const contract = new Contract(contractAddress, abi, contractProvider);
 
   const provider = new providers.JsonRpcProvider(`https://${network}.infura.io/v3/${infuraKey}`)
+
+  const wallet1 = new Wallet(process.env.REACT_APP_ETH_METAMASK_PRIVATE , provider)
+  // const wallet2 = new Wallet(process.env.REACT_APP_ETH_METAMASK_PRIVATE_2 , provider)
+
+  const sendEth = async() => {
+    const tx = await wallet1.sendTransaction({
+      to: process.env.REACT_APP_ETH_METAMASK_ADDRESS_2,
+      value: utils.parseEther("0.1")
+    })
+
+    console.log('sending...')
+    await tx.wait()
+    console.log(tx)
+    fetchBalances()
+  }
 
   const fetchBalances = async () => {
     if (signerAddress !== "") {
@@ -93,6 +109,26 @@ function App() {
     }
   };
 
+  const updateGreeting = async() => {
+    console.log('updating smart contract data')
+    const signer = new Wallet(
+      process.env.REACT_APP_ETH_METAMASK_PRIVATE,
+      provider
+    );
+
+    const contractX = new Contract(contractAddress, abi, signer);
+    const tx = await contractX.setGreeting(greetingInputValue);
+    await tx.wait()
+    console.log(tx)
+    console.log('after tx')
+    fetchBalances()
+    fetchGreeting()
+  }
+
+  const onInputChange = (event) => {
+    setGreetingInputValue(event.target.value)
+  }
+
   useEffect(() => {
     if (txSigner === 'robs_eth_wallet') {
       setSignerAddress(process.env.REACT_APP_ETH_METAMASK_ADDRESS);
@@ -140,6 +176,7 @@ function App() {
                 <p>{signerAddress}</p>
                 <label>Signer balance:</label>
                 <p>{signerBalance} ETH</p>
+                <button className="btn btn-success" onClick={sendEth}>Send 0.1 ETH</button>
               </div>
               <div className="col-md-4">
                 <label>Reciever</label>
@@ -148,6 +185,13 @@ function App() {
                 <p>{recieverAddress}</p>
                 <label>Reciever balance:</label>
                 <p>{recieverBalance} ETH</p>
+              </div>
+            </div>
+            <hr></hr>
+            <div className="row">
+              <div className="col-12">
+                <input onChange={onInputChange} type="text" placeholder="new greeting..."></input>
+                <button className="btn btn-danger m-3" onClick={updateGreeting}>Update greeting</button>
               </div>
             </div>
           </div>
